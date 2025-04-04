@@ -1,21 +1,16 @@
 import React, { useEffect, useState } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  ResponsiveContainer,
-  Legend,
-} from "recharts";
 import { serviceAsteroids } from "../api/fetchApi";
+import BarChart from "../components/BarChart";
+import Table from "../components/Table";
+import Switch from "../components/Switch";
+import Filter from "../components/Filter";
 
-const Chart = () => {
+const AsteroidChart = () => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [orbitalBodies, setOrbitalBodies] = useState([]);
   const [selectedBody, setSelectedBody] = useState("");
+  const [view, setView] = useState("chart");
 
   useEffect(() => {
     const getData = async () => {
@@ -52,8 +47,7 @@ const Chart = () => {
 
   useEffect(() => {
     if (selectedBody) {
-      const filtered = data.filter((a) => a.orbitalBody === selectedBody);
-      setFilteredData(filtered);
+      setFilteredData(data.filter((a) => a.orbitalBody === selectedBody));
     } else {
       setFilteredData(data);
     }
@@ -65,52 +59,20 @@ const Chart = () => {
         Asteroid Size Comparison
       </h2>
 
-      <div className="flex justify-center mb-4">
-        <select
-          className="p-2 border border-gray-300 rounded"
-          value={selectedBody}
-          onChange={(e) => setSelectedBody(e.target.value)}
-        >
-          <option value="">All Orbital Bodies</option>
-          {orbitalBodies.map((body) => (
-            <option key={body} value={body}>
-              {body}
-            </option>
-          ))}
-        </select>
-      </div>
+      <Switch view={view} setView={setView} />
+      <Filter
+        selectedBody={selectedBody}
+        setSelectedBody={setSelectedBody}
+        orbitalBodies={orbitalBodies}
+      />
 
-      <ResponsiveContainer width="100%" height={500}>
-        <BarChart data={filteredData} layout="vertical">
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis
-            type="number"
-            label={{
-              value: "Diameter (m)",
-              position: "insideBottom",
-              dy: 15,
-              fontSize: 14,
-            }}
-          />
-          <YAxis
-            dataKey="name"
-            type="category"
-            width={150}
-            label={{
-              value: "NEO Name",
-              angle: -90,
-              position: "insideLeft",
-              fontSize: 14,
-            }}
-          />
-          <Tooltip />
-          <Legend verticalAlign="top" height={36} />
-          <Bar dataKey="minDiameter" fill="#8884d8" name="Min Diameter (m)" />
-          <Bar dataKey="maxDiameter" fill="#82ca9d" name="Max Diameter (m)" />
-        </BarChart>
-      </ResponsiveContainer>
+      {view === "chart" ? (
+        <BarChart data={filteredData} />
+      ) : (
+        <Table data={filteredData} />
+      )}
     </div>
   );
 };
 
-export default Chart;
+export default AsteroidChart;
